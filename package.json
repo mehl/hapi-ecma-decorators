@@ -3,5 +3,8 @@
   "version": "0.1.0",
   "description": "Routing decorators with new ECMA proposal as implemented by TypeScript 5 and esbuild 0.21+",
   "main": "src/index.ts",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "@hapi/hapi": "21.3.10"
+  }
 }

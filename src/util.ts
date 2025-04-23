@@ -1,12 +1,31 @@
+import { ServerRoute } from "@hapi/hapi";
 import debugFn from "debug";
 
 const debug = debugFn("decorators");
 export class MethodMetaData {
-    routes: { method: string, path: string, options?: any; }[] = [];
+
+    currentConfig: any = { options: {} };
+    routes: { method: string, path: string, additionalConfig?: any; }[] = [];
     multipartFormData: boolean;
 
-    addRoute(method: string, path: string, options = undefined) {
-        this.routes.push({ method, path, options });
+    addRoute(method: string, path: string, additionalConfig = undefined) {
+        const config = {
+            ...this.currentConfig,
+            ...additionalConfig,
+            options: {
+                ...this.currentConfig.options,
+                ...additionalConfig?.options,
+            }
+        };
+        this.routes.push({ method, path, additionalConfig: config });
+        return this;
+    }
+
+    setAuthStrategy(strategy: string | boolean | object) {
+        if (!this.currentConfig.options) {
+            this.currentConfig.options = {};
+        }
+        this.currentConfig.options.auth = strategy;
         return this;
     }
 
@@ -34,8 +53,8 @@ function getAllPropertyDescriptors(obj: Object): { [key: string]: PropertyDescri
     return descriptors;
 }
 
-export const createRoutes = (routeObject: any) => {
-    const resultRoutes: any[] = [];
+export const createRoutes = (routeObject: any): ServerRoute[] => {
+    const resultRoutes: ServerRoute[] = [];
     const basePath = routeObject.__metadata?.path || "";
     const methods = Object.entries(getAllPropertyDescriptors(routeObject));
     methods.forEach(([key, descriptor]: [key: string, descriptor: PropertyDescriptor]) => {
@@ -44,7 +63,7 @@ export const createRoutes = (routeObject: any) => {
         const { routes, multipartFormData } = descriptor.value.__metadata;
         if (!routes) return;
         const defaultOptions = multipartFormData ? { payload: { multipart: true } } : {};
-        for (const { method, path, options } of routes) {
+        for (const { method, path, additionalConfig } of routes) {
             const routePath = basePath + path;
             debug(`Creating route ${method.toUpperCase()} ${routePath} ${multipartFormData ? "[multipart]" : ""}`);
             const handler = descriptor.value.bind(routeObject);
@@ -53,8 +72,9 @@ export const createRoutes = (routeObject: any) => {
                 path: routePath,
                 handler: handler,
                 options: defaultOptions,
-                ...(options || {})
+                ...(additionalConfig || {})
             };
+            // console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`, routeConfiguration);
             resultRoutes.push(routeConfiguration);
         }
     });
