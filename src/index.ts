@@ -61,6 +61,7 @@ export const Get = (path: string, additionalConfig?: any) => Route("get", path, 
 export const Delete = (path: string, additionalConfig?: any) => Route("delete", path, additionalConfig);
 export const Patch = (path: string, additionalConfig?: any) => Route("patch", path, additionalConfig, true);
 export const Post = (path: string, additionalConfig?: any) => Route("post", path, additionalConfig, true);
+export const Options = (path: string, additionalConfig?: any) => Route("options", path, additionalConfig, true);
 export const Put = (path: string, additionalConfig?: any) => Route("put", path, additionalConfig, true);
 export const All = (path: string, additionalConfig?: any) => Route("*", path, additionalConfig);
 

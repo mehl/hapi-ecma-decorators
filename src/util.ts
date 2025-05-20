@@ -74,7 +74,7 @@ export const createRoutes = (routeObject: any): ServerRoute[] => {
                 options: defaultOptions,
                 ...(additionalConfig || {})
             };
-            // console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`, routeConfiguration);
+            console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`); //, routeConfiguration
             resultRoutes.push(routeConfiguration);
         }
     });
