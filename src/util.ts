@@ -2,6 +2,41 @@ import { ServerRoute } from "@hapi/hapi";
 import debugFn from "debug";
 
 const debug = debugFn("decorators");
+
+export const routingMetaData = Symbol("routingMetaData");
+
+export const getOrCreateClassMetaData = (context: ClassMethodDecoratorContext) => {
+    if (!context.metadata[routingMetaData]) {
+        context.metadata[routingMetaData] = new ClassRouteMetaData();
+    }
+    return context.metadata[routingMetaData] as ClassRouteMetaData;
+};
+
+export const getOrCreateMethodMetaData = (context: ClassMethodDecoratorContext, methodName: string) => {
+    if (!context.metadata[routingMetaData]) {
+        context.metadata[routingMetaData] = new ClassRouteMetaData();
+    }
+    const classRouteMeta = context.metadata[routingMetaData] as ClassRouteMetaData;
+
+    if (!classRouteMeta.methods[methodName]) {
+        classRouteMeta.addMethod(methodName, new MethodMetaData());
+    }
+
+    return classRouteMeta.methods[methodName];
+};
+export class ClassRouteMetaData {
+
+    basePath: string;
+    methods: { [name: string]: MethodMetaData; } = {};
+
+    setBasePath(path: string) {
+        this.basePath = path;
+    }
+
+    addMethod(name: string, methodMetaData: MethodMetaData) {
+        this.methods[name] = methodMetaData;
+    }
+}
 export class MethodMetaData {
 
     currentConfig: any = { options: {} };
@@ -38,29 +73,28 @@ export class MethodMetaData {
 
 function getAllPropertyDescriptors(obj: Object): { [key: string]: PropertyDescriptor; } {
     const descriptors = {};
-
     let current = obj;
-
     while (current && current !== Object.prototype) {
         const currentDescriptors = Object.getOwnPropertyDescriptors(current);
-
         // Merge: Untergeordnete Klassen überschreiben ggf. obere
         Object.assign(descriptors, currentDescriptors);
-
         current = Object.getPrototypeOf(current);
     }
-
     return descriptors;
 }
 
 export const createRoutes = (routeObject: any): ServerRoute[] => {
     const resultRoutes: ServerRoute[] = [];
-    const basePath = routeObject.__metadata?.path || "";
+    const routeMetaData = routeObject.__metadata as ClassRouteMetaData;
+    const basePath = routeMetaData.basePath || "";
+
     const methods = Object.entries(getAllPropertyDescriptors(routeObject));
     methods.forEach(([key, descriptor]: [key: string, descriptor: PropertyDescriptor]) => {
+        // Do not allow constructor to be a route
         if (key === "constructor") return;
-        if (!descriptor.value?.__metadata) return;
-        const { routes, multipartFormData } = descriptor.value.__metadata;
+        const methodMetaData = routeMetaData.methods[key];
+        if (!methodMetaData) return;
+        const { routes, multipartFormData } = methodMetaData;
         if (!routes) return;
         const defaultOptions = multipartFormData ? { payload: { multipart: true } } : {};
         for (const { method, path, additionalConfig } of routes) {
@@ -74,7 +108,7 @@ export const createRoutes = (routeObject: any): ServerRoute[] => {
                 options: defaultOptions,
                 ...(additionalConfig || {})
             };
-            console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`); //, routeConfiguration
+            // console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`); //, routeConfiguration
             resultRoutes.push(routeConfiguration);
         }
     });

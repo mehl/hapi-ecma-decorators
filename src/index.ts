@@ -1,5 +1,5 @@
 import { ServerRoute } from "@hapi/hapi";
-import { createRoutes, MethodMetaData } from "./util";
+import { createRoutes, getOrCreateClassMetaData, getOrCreateMethodMetaData } from "./util";
 
 export interface RouteProvider {
     routes(): ServerRoute[];
@@ -21,12 +21,12 @@ type Constructor<T = {}> = new (...args: any[]) => T;
  * @returns A class decorator that returns an extended version of the original class with added metadata.
  */
 export const Controller = (options: { path: string; } | string) => {
-    return <T extends Constructor>(target: T): T & Constructor<RouteProvider> => {
+    return <T extends Constructor>(target: T, context: any): T & Constructor<RouteProvider> => {
+        const metaData = getOrCreateClassMetaData(context);
+        metaData.setBasePath(typeof options == "string" ? options : options.path);
         return class extends target implements RouteProvider {
-            __metadata = {
-                path: typeof options == "string" ? options : options.path,
-            };
-
+            // Symbol.meta is not supported (yet?) in all environments, so we use a custom property
+            __metadata = metaData;
             routes(): ServerRoute[] {
                 return createRoutes(this);
             }
@@ -35,13 +35,11 @@ export const Controller = (options: { path: string; } | string) => {
 };
 
 const Route = (method: string, path: string, additionalConfig?: any, multipartFormData?: boolean) => {
-    return (originalMethod: any, context: any) => {
-        if (!originalMethod.__metadata) {
-            originalMethod.__metadata = new MethodMetaData();
-        }
-        originalMethod.__metadata.addRoute(method, path, additionalConfig);
+    return (originalMethod: any, context: ClassMethodDecoratorContext) => {
+        const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
+        metaData.addRoute(method, path, additionalConfig);
         if (multipartFormData) {
-            originalMethod.__metadata.setMultipartFormData();
+            metaData.setMultipartFormData();
         }
     };
 };
@@ -66,10 +64,8 @@ export const Put = (path: string, additionalConfig?: any) => Route("put", path, 
 export const All = (path: string, additionalConfig?: any) => Route("*", path, additionalConfig);
 
 export const Auth = (strategy: string | boolean | object) => {
-    return (target: any) => {
-        if (!target.__metadata) {
-            target.__metadata = new MethodMetaData();
-        }
-        target.__metadata.setAuthStrategy(strategy);
+    return (originalMethod: any, context: ClassMethodDecoratorContext) => {
+        const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
+        metaData.setAuthStrategy(strategy);
     };
 };
