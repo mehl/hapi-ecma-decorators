@@ -2,6 +2,8 @@
 
 I love decorators, and with esbuild supporting modern ECMAScript syntax starting from version 0.21, I am eager to embrace them in my projects. This package offers a seamless way to define routes in [hapi.dev](https://hapi.dev) using the new ECMAScript decorators.
 
+Unfortunately these are still only a proposal, so things may still change.
+
 ## Features
 
 - Define routes using class methods and decorators.
@@ -70,12 +72,13 @@ This decorator is used to define a controller with a specific base path. It augm
 **Returns:**  
 A class decorator that extends the original class with added metadata.
 
-### @GET(path: string, options: object)
-### @DELETE(path: string, options: object)
-### @POST(path: string, options: object)
-### @PUT(path: string, options: object)
-### @PATCH(path: string, options: object)
-### @ALL(path: string, options: object)
+### @Get(path: string, options: object)
+### @Delete(path: string, options: object)
+### @Options(path: string, options: object)
+### @Post(path: string, options: object)
+### @Put(path: string, options: object)
+### @Patch(path: string, options: object)
+### @All(path: string, options: object)
 
 Route decorators are available for HTTP methods such as GET, DELETE, PATCH, POST, and PUT, as well as a decorator to handle all requests. These decorators allow you to define a route with the specified path and additional options, as outlined below.
 
@@ -87,6 +90,28 @@ Route decorators are available for HTTP methods such as GET, DELETE, PATCH, POST
     For POST, PUT, and PATCH routes, multipart form data handling is enabled automatically.
 
 These decorators streamline the process of registering routes by marking methods with the appropriate HTTP verb and ensuring necessary configurations are in place.
+
+### @Auth(authStrategy: string | boolean | object)
+
+Defines the auth strategy for the current route. Can be either a string (name of a registered strategoy), boolean (true: do auth, false: don't), or c a complete auth configuration object like it is used in hapi route definitions.
+
+The @Auth always applies to all routes of the current method that are defined ABOVE the @Auth decorator, so order matters. Example:
+
+```javascript
+class Example {
+    ...
+    @Options(...)
+    @Post(...)
+    @Auth(true) // Applies to Options and Post
+    @Get(...)
+    @Auth(false) // Applies to Get
+    method() {
+        ...
+    }
+    ...
+}
+```
+
 
 ## Requirements
 
