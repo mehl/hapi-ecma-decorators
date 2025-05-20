@@ -15,8 +15,7 @@ type Constructor<T = {}> = new (...args: any[]) => T;
  * "metadata" property that contains the base path for the controller and a "routes" method that
  * returns all routes created using the decorator.
  *
- * @param options - An object containing configuration options for the controller OR just the path as string.
- * @param options.path - The base path that will prefix all routes defined in the controller. Please be aware that this will be a pure string concatenation, no fancy path joining
+ * @param options - An object containing configuration options for the controller OR just the path as string. If it is an object: path is the base path that will prefix all routes defined in the controller. Please be aware that this will be a pure string concatenation, no fancy path joining
  *
  * @returns A class decorator that returns an extended version of the original class with added metadata.
  */

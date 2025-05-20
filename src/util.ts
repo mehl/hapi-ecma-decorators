@@ -6,17 +6,17 @@ const debug = debugFn("decorators");
 export const routingMetaData = Symbol("routingMetaData");
 
 export const getOrCreateClassMetaData = (context: ClassMethodDecoratorContext) => {
-    if (!context.metadata[routingMetaData]) {
+    if (context.metadata && !context.metadata?.[routingMetaData]) {
         context.metadata[routingMetaData] = new ClassRouteMetaData();
     }
-    return context.metadata[routingMetaData] as ClassRouteMetaData;
+    return context.metadata?.[routingMetaData] as ClassRouteMetaData;
 };
 
 export const getOrCreateMethodMetaData = (context: ClassMethodDecoratorContext, methodName: string) => {
-    if (!context.metadata[routingMetaData]) {
+    if (context.metadata && !context.metadata?.[routingMetaData]) {
         context.metadata[routingMetaData] = new ClassRouteMetaData();
     }
-    const classRouteMeta = context.metadata[routingMetaData] as ClassRouteMetaData;
+    const classRouteMeta = context.metadata?.[routingMetaData] as ClassRouteMetaData;
 
     if (!classRouteMeta.methods[methodName]) {
         classRouteMeta.addMethod(methodName, new MethodMetaData());
@@ -26,7 +26,7 @@ export const getOrCreateMethodMetaData = (context: ClassMethodDecoratorContext, 
 };
 export class ClassRouteMetaData {
 
-    basePath: string;
+    basePath: string = "";
     methods: { [name: string]: MethodMetaData; } = {};
 
     setBasePath(path: string) {
@@ -41,12 +41,12 @@ export class MethodMetaData {
 
     currentConfig: any = { options: {} };
     routes: { method: string, path: string, additionalConfig?: any; }[] = [];
-    multipartFormData: boolean;
+    multipartFormData: boolean = false;
 
-    addRoute(method: string, path: string, additionalConfig = undefined) {
+    addRoute(method: string, path: string, additionalConfig: any = undefined) {
         const config = {
             ...this.currentConfig,
-            ...additionalConfig,
+            ...(additionalConfig || {}),
             options: {
                 ...this.currentConfig.options,
                 ...additionalConfig?.options,

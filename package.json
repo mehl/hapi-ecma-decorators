@@ -2,9 +2,28 @@
   "name": "hapi-ecma-decorators",
   "version": "0.1.0",
   "description": "Routing decorators with new ECMA proposal as implemented by TypeScript 5 and esbuild 0.21+",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
   "license": "MIT",
   "peerDependencies": {
     "@hapi/hapi": "21.3.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
