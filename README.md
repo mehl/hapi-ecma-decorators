@@ -1,8 +1,8 @@
-# Hapi ECMA Decorators for Routing
+# Hapi Routing Decorators using ECMA Proposal Stage 3
 
-I love decorators, and with esbuild supporting modern ECMAScript syntax starting from version 0.21, I am eager to embrace them in my projects. This package offers a seamless way to define routes in [hapi.dev](https://hapi.dev) using the new ECMAScript decorators.
+This package offers a seamless way to define routes in [hapi.dev](https://hapi.dev) using the new **ECMAScript decorators**, implementing the most current [Proposal Stage 3](https://github.com/tc39/proposal-decorators), using the also Stage 3 [metadata on decorators](https://github.com/tc39/proposal-decorator-metadata)
 
-Unfortunately these are still only a proposal, so things may still change.
+It is currently tested and known to work with esbuild 0.25+.
 
 ## Features
 
@@ -11,21 +11,29 @@ Unfortunately these are still only a proposal, so things may still change.
 
 Be aware that not all hapi route configuration options are supported currently.
 
+## Status
+
+Although this package is in early stage, I already use it in productive environments. But be aware it is currently only tested with esbuild 0.25+. Testing against other implementations of ECMA Decorators (babel, tsc) still to be done.
+
 ## Usage
 
 ### Example
 
 ```typescript
 import Hapi from '@hapi/hapi';
-import { Controller, Get } from 'hapi-ecma-decorators';
+import { Controller, Get, RouteProvider } from 'hapi-ecma-decorators';
 
+// 1)
 @Controller({path: '/api'})
 class ApiController {
+
+    // 2)
     @Get('/hello')
     async getHello(request, h) {
         return { message: 'Hello, world!' };
     }
 
+    // 2)
     @Post('/data')
     async postData(request, h) {
         const { payload } = request;
@@ -39,8 +47,8 @@ const init = async () => {
         host: 'localhost',
     });
 
-    // Yes, I know, I'm using any here.
-    server.route((new ApiController() as any).routes());
+    // 3)
+    server.route((new ApiController() as ApiController & RouteProvider).routes());
 
     await server.start();
     console.log('Server running on %s', server.info.uri);
@@ -62,12 +70,12 @@ init();
 This decorator is used to define a controller with a specific base path. It augments the decorated class with additional route metadata and a `routes` method that returns all the routes created using this decorator.
 
 **Remarks:**  
-- Enhances the class with a `metadata` property containing the base path.
+- Enhances the class with a `__metadata` property containing routing information.
 - Adds a `routes` method that aggregates all routes defined with the decorator.
 
 **Parameters:**  
 - `options`: An object with configuration options for the controller.
-    - `options.path`: A string representing the base path that will prefix all routes. Note that this is a simple string concatenation without any advanced path joining.
+    - `options.path`: A string representing the base path that will prefix all routes. Note that this is a **simple string concatenation** without any advanced path joining.
 
 **Returns:**  
 A class decorator that extends the original class with added metadata.
@@ -87,7 +95,7 @@ Route decorators are available for HTTP methods such as GET, DELETE, PATCH, POST
 - The `options` parameter accepts additional configuration options for the route. Refer to the hapi.js documentation for further details.
 
 **Automatic Multipart Support**:  
-    For POST, PUT, and PATCH routes, multipart form data handling is enabled automatically.
+    For `POST`, `PUT`, and `PATCH` routes, multipart form data handling is enabled automatically.
 
 These decorators streamline the process of registering routes by marking methods with the appropriate HTTP verb and ensuring necessary configurations are in place.
 
@@ -95,7 +103,7 @@ These decorators streamline the process of registering routes by marking methods
 
 Defines the auth strategy for the current route. Can be either a string (name of a registered strategoy), boolean (true: do auth, false: don't), or c a complete auth configuration object like it is used in hapi route definitions.
 
-The @Auth always applies to all routes of the current method that are defined ABOVE the @Auth decorator, so order matters. Example:
+The `@Auth` always applies to all routes of the current method that are defined **above** the `@Auth` decorator, so order matters. Example:
 
 ```javascript
 class Example {
