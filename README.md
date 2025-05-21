@@ -17,6 +17,14 @@ Although this package is in early stage, I already use it in productive environm
 
 ## Usage
 
+### Installation
+
+```shell
+# Use the package manager of your choice
+npm add hapi-ecma-decorators
+yarn add hapi-ecma-decorators
+```
+
 ### Example
 
 ```typescript
@@ -133,3 +141,9 @@ This project is licensed under the MIT License.
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+
+## See also
+
+https://www.npmjs.com/package/hapi-ecma-decorators  
+https://hapi-decorators.bastian-frank.de/
+
