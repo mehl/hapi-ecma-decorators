@@ -5,8 +5,9 @@
   "author": {
     "name": "Bastian Frank",
     "email": "npm@bastian-frank.de",
-    "url": "https://hapi-decorators.bastian-frank.de/"
+    "url": "https://www.bastian-frank.de/"
   },
+  "homepage": "https://hapi-decorators.bastian-frank.de/",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
