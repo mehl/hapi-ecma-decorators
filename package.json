@@ -1,6 +1,6 @@
 {
   "name": "hapi-ecma-decorators",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Routing decorators with new ECMA proposal as implemented by TypeScript 5 and esbuild 0.21+",
   "author": {
     "name": "Bastian Frank",
