@@ -33,13 +33,10 @@ export const Controller = (options: { path: string; } | string) => {
     };
 };
 
-const Route = (method: string, path: string, additionalConfig?: any, multipartFormData?: boolean) => {
+const Route = (method: string, path: string, additionalConfig?: any) => {
     return (originalMethod: any, context: ClassMethodDecoratorContext) => {
         const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
         metaData.addRoute(method, path, additionalConfig);
-        if (multipartFormData) {
-            metaData.setMultipartFormData();
-        }
     };
 };
 
@@ -56,15 +53,22 @@ const Route = (method: string, path: string, additionalConfig?: any, multipartFo
  */
 export const Get = (path: string, additionalConfig?: any) => Route("get", path, additionalConfig);
 export const Delete = (path: string, additionalConfig?: any) => Route("delete", path, additionalConfig);
-export const Patch = (path: string, additionalConfig?: any) => Route("patch", path, additionalConfig, true);
-export const Post = (path: string, additionalConfig?: any) => Route("post", path, additionalConfig, true);
-export const Options = (path: string, additionalConfig?: any) => Route("options", path, additionalConfig, true);
-export const Put = (path: string, additionalConfig?: any) => Route("put", path, additionalConfig, true);
+export const Patch = (path: string, additionalConfig?: any) => Route("patch", path, additionalConfig);
+export const Post = (path: string, additionalConfig?: any) => Route("post", path, additionalConfig);
+export const Options = (path: string, additionalConfig?: any) => Route("options", path, additionalConfig);
+export const Put = (path: string, additionalConfig?: any) => Route("put", path, additionalConfig);
 export const All = (path: string, additionalConfig?: any) => Route("*", path, additionalConfig);
 
 export const Auth = (strategy: string | boolean | object) => {
     return (originalMethod: any, context: ClassMethodDecoratorContext) => {
         const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
         metaData.setAuthStrategy(strategy);
+    };
+};
+
+export const Payload = (payload: "multipart" | object) => {
+    return (originalMethod: any, context: ClassMethodDecoratorContext) => {
+        const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
+        metaData.setPayload(payload);
     };
 };

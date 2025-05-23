@@ -128,11 +128,33 @@ class Example {
 }
 ```
 
+### @Payload(payload: "multipart" | object)
+
+Defines a payload for the current route. Either a complete payload definition object, or just the string `multipart`, which simply sets `options.payload.multipart = true`
+
+Rules for more then one route decorator are the same as for `@Auth`.
 
 ## Requirements
 
 - esbuild 0.21+ (or similar transpiling) for ECMA decorator support
 - Hapi.js
+
+## Changes
+
+### v0.2.0
+
+#### Remove "magic" multipart for POST/PUT/PATCH and added new @Payload decorator instead
+
+Similar to @Auth the new @Payload decorator can define a payload object for routes. This replaces the magic "multipart: true" for POST/PATCH/PUT, which normally would be a **breaking change**. But it didn't work in the last version anyway, so I decided to go for 0.2.0
+
+#### Added tests using vitest
+
+Decorators are now tested with vitest.
+
+### v0.1.0
+
+Initial release
+
 
 ## License
 

@@ -41,7 +41,6 @@ export class MethodMetaData {
 
     currentConfig: any = { options: {} };
     routes: { method: string, path: string, additionalConfig?: any; }[] = [];
-    multipartFormData: boolean = false;
 
     addRoute(method: string, path: string, additionalConfig: any = undefined) {
         const config = {
@@ -64,8 +63,20 @@ export class MethodMetaData {
         return this;
     }
 
-    setMultipartFormData() {
-        this.multipartFormData = true;
+    setPayload(payload: "multipart" | object) {
+        if (!this.currentConfig.options) {
+            this.currentConfig.options = {};
+        }
+        if (typeof payload === "string" && payload === "multipart") {
+            this.currentConfig.options.payload = {
+                multipart: true
+            };
+        } else if (typeof payload === "object") {
+            this.currentConfig.options.payload = {
+                ...this.currentConfig.options.payload,
+                ...payload
+            };
+        }
         return this;
     }
 
@@ -94,19 +105,23 @@ export const createRoutes = (routeObject: any): ServerRoute[] => {
         if (key === "constructor") return;
         const methodMetaData = routeMetaData.methods[key];
         if (!methodMetaData) return;
-        const { routes, multipartFormData } = methodMetaData;
+        const { routes } = methodMetaData;
         if (!routes) return;
-        const defaultOptions = multipartFormData ? { payload: { multipart: true } } : {};
+        const defaultOptions = {};
         for (const { method, path, additionalConfig } of routes) {
             const routePath = basePath + path;
+            const multipartFormData = additionalConfig?.options?.payload?.multipart;
             debug(`Creating route ${method.toUpperCase()} ${routePath} ${multipartFormData ? "[multipart]" : ""}`);
             const handler = descriptor.value.bind(routeObject);
             const routeConfiguration = {
                 method: method.toUpperCase(),
                 path: routePath,
                 handler: handler,
-                options: defaultOptions,
-                ...(additionalConfig || {})
+                ...(additionalConfig || {}),
+                options: {
+                    ...defaultOptions,
+                    ...additionalConfig?.options,
+                }
             };
             // console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`); //, routeConfiguration
             resultRoutes.push(routeConfiguration);
