@@ -13,7 +13,7 @@ Be aware that not all hapi route configuration options are supported currently.
 
 ## Status
 
-Although this package is in early stage, I already use it in productive environments. But be aware it is currently only tested with esbuild 0.25+. Testing against other implementations of ECMA Decorators (babel, tsc) still to be done.
+Although this package is in early stage, I already use it in productive environments. It is known to work with esbuild 0.25+. Testing against other implementations of ECMA Decorators (babel, tsc) still to be done.
 
 ## Usage
 
@@ -102,10 +102,9 @@ Route decorators are available for HTTP methods such as GET, DELETE, PATCH, POST
 - The `path` parameter specifies the route's path.
 - The `options` parameter accepts additional configuration options for the route. Refer to the hapi.js documentation for further details.
 
-**Automatic Multipart Support**:  
-    For `POST`, `PUT`, and `PATCH` routes, multipart form data handling is enabled automatically.
+**Multipart Payload Support**:  
 
-These decorators streamline the process of registering routes by marking methods with the appropriate HTTP verb and ensuring necessary configurations are in place.
+Automatic multipart payload support was removed (didn't work anyway) and is replaced now by `@Payload('multipart')`
 
 ### @Auth(authStrategy: string | boolean | object)
 
