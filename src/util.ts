@@ -1,4 +1,4 @@
-import { ServerRoute } from "@hapi/hapi";
+import { AuthSettings, RouteOptions, RouteOptionsPayload, RouteOptionsValidate, ServerRoute } from "@hapi/hapi";
 import debugFn from "debug";
 
 const debug = debugFn("decorators");
@@ -40,22 +40,22 @@ export class ClassRouteMetaData {
 export class MethodMetaData {
 
     currentConfig: any = { options: {} };
-    routes: { method: string, path: string, additionalConfig?: any; }[] = [];
+    routes: { method: string, path: string, additionalConfig?: Partial<ServerRoute>; }[] = [];
 
-    addRoute(method: string, path: string, additionalConfig: any = undefined) {
+    addRoute(method: string, path: string, additionalConfig: Partial<ServerRoute> | undefined = undefined) {
         const config = {
             ...this.currentConfig,
             ...(additionalConfig || {}),
             options: {
-                ...this.currentConfig.options,
-                ...additionalConfig?.options,
+                ...(this.currentConfig.options || {}),
+                ...(additionalConfig?.options || {}),
             }
         };
         this.routes.push({ method, path, additionalConfig: config });
         return this;
     }
 
-    setAuthStrategy(strategy: string | boolean | object) {
+    setAuthStrategy(strategy: string | boolean | AuthSettings) {
         if (!this.currentConfig.options) {
             this.currentConfig.options = {};
         }
@@ -63,7 +63,18 @@ export class MethodMetaData {
         return this;
     }
 
-    setPayload(payload: "multipart" | object) {
+    setValidate(validate: RouteOptionsValidate) {
+        if (!this.currentConfig.options) {
+            this.currentConfig.options = {};
+        }
+        this.currentConfig.options.validate = {
+            ...(this.currentConfig.options.validate || {}),
+            ...validate
+        };
+        return this;
+    }
+
+    setPayload(payload: "multipart" | RouteOptionsPayload) {
         if (!this.currentConfig.options) {
             this.currentConfig.options = {};
         }
@@ -110,7 +121,7 @@ export const createRoutes = (routeObject: any): ServerRoute[] => {
         const defaultOptions = {};
         for (const { method, path, additionalConfig } of routes) {
             const routePath = basePath + path;
-            const multipartFormData = additionalConfig?.options?.payload?.multipart;
+            const multipartFormData = (additionalConfig?.options as RouteOptions)?.payload?.multipart;
             debug(`Creating route ${method.toUpperCase()} ${routePath} ${multipartFormData ? "[multipart]" : ""}`);
             const handler = descriptor.value.bind(routeObject);
             const routeConfiguration = {
@@ -122,7 +133,7 @@ export const createRoutes = (routeObject: any): ServerRoute[] => {
                     ...defaultOptions,
                     ...additionalConfig?.options,
                 }
-            };
+            } as ServerRoute;
             // console.log(`Route: ${routeConfiguration.method} ${routeConfiguration.path}`); //, routeConfiguration
             resultRoutes.push(routeConfiguration);
         }

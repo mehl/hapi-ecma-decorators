@@ -133,6 +133,10 @@ Defines a payload for the current route. Either a complete payload definition ob
 
 Rules for more then one route decorator are the same as for `@Auth`.
 
+### @Validate(validate: object)
+
+Defines a validation for the current route. The object is the same as for hapi's validate option.
+
 ## Requirements
 
 - esbuild 0.21+ (or similar transpiling) for ECMA decorator support
@@ -140,11 +144,19 @@ Rules for more then one route decorator are the same as for `@Auth`.
 
 ## Changes
 
+### v0.2.2
+
+Added `@Validate` decorator and better typing for all decorator parameters.
+
+### v0.2.1
+
+Only documentation changes
+
 ### v0.2.0
 
 #### Remove "magic" multipart for POST/PUT/PATCH and added new @Payload decorator instead
 
-Similar to @Auth the new @Payload decorator can define a payload object for routes. This replaces the magic "multipart: true" for POST/PATCH/PUT, which normally would be a **breaking change**. But it didn't work in the last version anyway, so I decided to go for 0.2.0
+Similar to @Auth the new `@Payload` decorator can define a payload object for routes. This replaces the magic "multipart: true" for POST/PATCH/PUT, which normally would be a **breaking change**. But it didn't work in the last version anyway, so I decided to go for 0.2.0
 
 #### Added tests using vitest
 

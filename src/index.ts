@@ -1,4 +1,4 @@
-import { ServerRoute } from "@hapi/hapi";
+import { AuthSettings, RouteOptionsPayload, RouteOptionsValidate, ServerRoute } from "@hapi/hapi";
 import { createRoutes, getOrCreateClassMetaData, getOrCreateMethodMetaData } from "./util";
 
 export interface RouteProvider {
@@ -33,7 +33,7 @@ export const Controller = (options: { path: string; } | string) => {
     };
 };
 
-const Route = (method: string, path: string, additionalConfig?: any) => {
+const Route = (method: string, path: string, additionalConfig?: Partial<ServerRoute>) => {
     return (originalMethod: any, context: ClassMethodDecoratorContext) => {
         const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
         metaData.addRoute(method, path, additionalConfig);
@@ -51,24 +51,31 @@ const Route = (method: string, path: string, additionalConfig?: any) => {
  * @param additionalConfig - Additional configuration options for the route - see hapi documentation for more details.
  *
  */
-export const Get = (path: string, additionalConfig?: any) => Route("get", path, additionalConfig);
-export const Delete = (path: string, additionalConfig?: any) => Route("delete", path, additionalConfig);
-export const Patch = (path: string, additionalConfig?: any) => Route("patch", path, additionalConfig);
-export const Post = (path: string, additionalConfig?: any) => Route("post", path, additionalConfig);
-export const Options = (path: string, additionalConfig?: any) => Route("options", path, additionalConfig);
-export const Put = (path: string, additionalConfig?: any) => Route("put", path, additionalConfig);
-export const All = (path: string, additionalConfig?: any) => Route("*", path, additionalConfig);
+export const Get = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("get", path, additionalConfig);
+export const Delete = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("delete", path, additionalConfig);
+export const Patch = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("patch", path, additionalConfig);
+export const Post = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("post", path, additionalConfig);
+export const Options = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("options", path, additionalConfig);
+export const Put = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("put", path, additionalConfig);
+export const All = (path: string, additionalConfig?: Partial<ServerRoute>) => Route("*", path, additionalConfig);
 
-export const Auth = (strategy: string | boolean | object) => {
+export const Auth = (strategy: string | boolean | AuthSettings) => {
     return (originalMethod: any, context: ClassMethodDecoratorContext) => {
         const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
         metaData.setAuthStrategy(strategy);
     };
 };
 
-export const Payload = (payload: "multipart" | object) => {
+export const Payload = (payload: "multipart" | RouteOptionsPayload) => {
     return (originalMethod: any, context: ClassMethodDecoratorContext) => {
         const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
         metaData.setPayload(payload);
+    };
+};
+
+export const Validate = (validate: RouteOptionsValidate) => {
+    return (originalMethod: any, context: ClassMethodDecoratorContext) => {
+        const metaData = getOrCreateMethodMetaData(context, originalMethod.name);
+        metaData.setValidate(validate);
     };
 };
